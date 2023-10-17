@@ -8,17 +8,37 @@ from tensorflow.keras.layers import Input, Embedding, LSTM , Dense,GlobalMaxPool
 from tensorflow.keras.models import Model
 import matplotlib.pyplot as plt
 import random
+import os 
+from pymongo import MongoClient
+
 
 with open('content.json') as content:
   data1 = json.load(content)
 
-print(data1)
 #getting all the data to lists
 tags = []
 inputs = []
 responses={}
-connectionString = "mongodb+srv://vivekrana775:<password>@cluster0.yolwjkm.mongodb.net/?retryWrites=true&w=majority"
-for intent in data1['intents']:
+connectionString = "mongodb+srv://vivekrana775:12345@cluster0.yolwjkm.mongodb.net/?retryWrites=true&w=majority"
+
+client = MongoClient(connectionString)
+dbs = client.list_database_names()
+
+chatbot_db = client.chatbot
+chatbot_collection = chatbot_db.Chatbot
+
+# inserting  intent  into database
+def insert_test_doc(document):
+  chatbot_collection.insert_one(document)
+
+#getting all the intents 
+def getAllIntents():
+  intents = chatbot_collection.find()
+  return intents
+
+# data1 = getAllIntents()
+
+for intent in data1:
   responses[intent['tag']]=intent['responses']
   for lines in intent['input']:
     inputs.append(lines)
@@ -31,6 +51,7 @@ data = pd.DataFrame({"inputs":inputs,
 import string
 data['inputs'] = data['inputs'].apply(lambda wrd:[ltrs.lower() for ltrs in wrd if ltrs not in string.punctuation])
 data['inputs'] = data['inputs'].apply(lambda wrd: ''.join(wrd))
+
 #tokenize the data
 from tensorflow.keras.preprocessing.text import Tokenizer
 tokenizer = Tokenizer(num_words=2000)
