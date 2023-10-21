@@ -12,8 +12,8 @@ import os
 from pymongo import MongoClient
 
 
-with open('content.json') as content:
-  data1 = json.load(content)
+# with open('content.json') as content:
+#   data1 = json.load(content)
 
 #getting all the data to lists
 tags = []
